@@ -1,5 +1,5 @@
 // Service type definitions
-export type ServiceType = 'plumbing' | 'hvac' | 'electrical' | 'carpentry';
+export type ServiceType = 'plumbing' | 'hvac' | 'electrical' | 'carpentry' | 'landscaping' | 'painting' | 'walling';
 
 export interface Service {
   id: string;

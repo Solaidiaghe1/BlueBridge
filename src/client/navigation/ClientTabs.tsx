@@ -2,7 +2,7 @@ import React from 'react';
 import { View, TouchableOpacity, Text, StyleSheet } from 'react-native';
 import { colors, spacing, typography } from '../../shared/theme';
 
-type TabName = 'Services' | 'Request' | 'Account' | 'Support';
+type TabName = 'Services' | 'Requests' | 'Account' | 'Support';
 
 interface ClientTabsProps {
   currentTab: TabName;
@@ -10,7 +10,7 @@ interface ClientTabsProps {
 }
 
 export const ClientTabs: React.FC<ClientTabsProps> = ({ currentTab, onTabChange }) => {
-  const tabs: TabName[] = ['Services', 'Request', 'Account', 'Support'];
+  const tabs: TabName[] = ['Services', 'Requests', 'Account', 'Support'];
 
   return (
     <View style={styles.container}>
@@ -42,7 +42,9 @@ const styles = StyleSheet.create({
     backgroundColor: colors.white,
     borderTopWidth: 1,
     borderTopColor: colors.gray200,
-    paddingBottom: spacing.sm,
+    paddingBottom: spacing.md,
+    paddingTop: spacing.sm,
+    marginBottom: spacing.xs,
   },
   tab: {
     flex: 1,

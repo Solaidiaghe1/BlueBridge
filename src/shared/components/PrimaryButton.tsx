@@ -79,22 +79,22 @@ const styles = StyleSheet.create({
   button: {
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: borderRadius.xl,
+    borderRadius: 25,
   },
   button_small: {
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.lg,
-    minHeight: 40,
+    paddingVertical: spacing.xs,
+    paddingHorizontal: spacing.md,
+    minHeight: 36,
   },
   button_medium: {
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.xl,
-    minHeight: 48,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.lg,
+    minHeight: 42,
   },
   button_large: {
-    paddingVertical: spacing.lg,
-    paddingHorizontal: spacing.xl,
-    minHeight: 56,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.lg,
+    minHeight: 44,
   },
   buttonPrimary: {
     backgroundColor: colors.primary,
@@ -121,7 +121,7 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.base,
   },
   text_large: {
-    fontSize: typography.fontSize.xl,
+    fontSize: typography.fontSize.base,
   },
   textPrimary: {
     color: colors.white,

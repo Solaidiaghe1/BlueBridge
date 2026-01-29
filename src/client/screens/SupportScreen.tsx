@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   Linking,
 } from 'react-native';
+import { Feather } from '@expo/vector-icons';
 import { colors, spacing, borderRadius, typography, shadows } from '../../shared/theme';
 import { Header } from '../../shared/components/Header';
 import { Card } from '../../shared/components/Card';
@@ -32,83 +33,84 @@ export const SupportScreen: React.FC = () => {
         <Header title="Support" subtitle="We're here to help" />
 
         <View style={styles.content}>
-          {/* Call Us */}
-          <TouchableOpacity onPress={handleCall} activeOpacity={0.7}>
-            <Card style={styles.supportCard}>
-              <View style={styles.iconCircle}>
-                <Text style={styles.icon}>📞</Text>
+          {/* Contact Methods Card */}
+          <Card style={styles.contactCard}>
+            <Text style={styles.sectionTitle}>Get in Touch</Text>
+            
+            <TouchableOpacity style={styles.contactRow} onPress={handleCall} activeOpacity={0.7}>
+              <View style={styles.contactIconContainer}>
+                <Feather name="phone" size={20} color={colors.primary} />
               </View>
-              <Text style={styles.cardTitle}>Call Us</Text>
-              <Text style={styles.cardSubtitle}>Mon-Fri 8am-8pm EST</Text>
-              <Text style={styles.cardLink}>(555) 123-4567</Text>
-            </Card>
-          </TouchableOpacity>
+              <View style={styles.contactTextContainer}>
+                <Text style={styles.contactTitle}>Call Us</Text>
+                <Text style={styles.contactSubtitle}>(555) 123-4567</Text>
+                <Text style={styles.contactHours}>Mon-Fri 8am-8pm EST</Text>
+              </View>
+              <Feather name="arrow-right" size={20} color={colors.textSecondary} />
+            </TouchableOpacity>
 
-          {/* Email Us */}
-          <TouchableOpacity onPress={handleEmail} activeOpacity={0.7}>
-            <Card style={styles.supportCard}>
-              <View style={styles.iconCircle}>
-                <Text style={styles.icon}>📧</Text>
-              </View>
-              <Text style={styles.cardTitle}>Email Us</Text>
-              <Text style={styles.cardSubtitle}>Response within 24 hours</Text>
-              <Text style={styles.cardLink}>support@bluebridge.com</Text>
-            </Card>
-          </TouchableOpacity>
+            <View style={styles.divider} />
 
-          {/* Live Chat */}
-          <TouchableOpacity onPress={handleChat} activeOpacity={0.7}>
-            <Card style={styles.supportCard}>
-              <View style={styles.iconCircle}>
-                <Text style={styles.icon}>💬</Text>
+            <TouchableOpacity style={styles.contactRow} onPress={handleEmail} activeOpacity={0.7}>
+              <View style={styles.contactIconContainer}>
+                <Feather name="mail" size={20} color={colors.primary} />
               </View>
-              <Text style={styles.cardTitle}>Live Chat</Text>
-              <Text style={styles.cardSubtitle}>Average wait: 3 min</Text>
-              <Text style={styles.cardLink}>Start Chat</Text>
-            </Card>
-          </TouchableOpacity>
+              <View style={styles.contactTextContainer}>
+                <Text style={styles.contactTitle}>Email Us</Text>
+                <Text style={styles.contactSubtitle}>support@bluebridge.com</Text>
+                <Text style={styles.contactHours}>Response within 24 hours</Text>
+              </View>
+              <Feather name="arrow-right" size={20} color={colors.textSecondary} />
+            </TouchableOpacity>
+
+            <View style={styles.divider} />
+
+            <TouchableOpacity style={styles.contactRow} onPress={handleChat} activeOpacity={0.7}>
+              <View style={styles.contactIconContainer}>
+                <Feather name="message-circle" size={20} color={colors.primary} />
+              </View>
+              <View style={styles.contactTextContainer}>
+                <Text style={styles.contactTitle}>Live Chat</Text>
+                <Text style={styles.contactSubtitle}>Chat with our team</Text>
+                <Text style={styles.contactHours}>Average wait: 3 min</Text>
+              </View>
+              <Feather name="arrow-right" size={20} color={colors.textSecondary} />
+            </TouchableOpacity>
+          </Card>
 
           {/* FAQ Section */}
-          <View style={styles.faqSection}>
-            <Text style={styles.faqTitle}>Frequently Asked Questions</Text>
+          <Card style={styles.faqCard}>
+            <Text style={styles.sectionTitle}>Frequently Asked Questions</Text>
+            
+            <TouchableOpacity style={styles.faqRow} activeOpacity={0.7}>
+              <Text style={styles.faqQuestion}>How does the inspection fee work?</Text>
+              <Text style={styles.faqIcon}>›</Text>
+            </TouchableOpacity>
+            <View style={styles.divider} />
 
-            <Card style={styles.faqCard}>
-              <TouchableOpacity style={styles.faqItem}>
-                <Text style={styles.faqQuestion}>How does the inspection fee work?</Text>
-                <Text style={styles.faqIcon}>›</Text>
-              </TouchableOpacity>
-            </Card>
+            <TouchableOpacity style={styles.faqRow} activeOpacity={0.7}>
+              <Text style={styles.faqQuestion}>What happens after the inspection?</Text>
+              <Text style={styles.faqIcon}>›</Text>
+            </TouchableOpacity>
+            <View style={styles.divider} />
 
-            <Card style={styles.faqCard}>
-              <TouchableOpacity style={styles.faqItem}>
-                <Text style={styles.faqQuestion}>
-                  What happens after the inspection?
-                </Text>
-                <Text style={styles.faqIcon}>›</Text>
-              </TouchableOpacity>
-            </Card>
+            <TouchableOpacity style={styles.faqRow} activeOpacity={0.7}>
+              <Text style={styles.faqQuestion}>How are workers verified?</Text>
+              <Text style={styles.faqIcon}>›</Text>
+            </TouchableOpacity>
+            <View style={styles.divider} />
 
-            <Card style={styles.faqCard}>
-              <TouchableOpacity style={styles.faqItem}>
-                <Text style={styles.faqQuestion}>How are workers verified?</Text>
-                <Text style={styles.faqIcon}>›</Text>
-              </TouchableOpacity>
-            </Card>
+            <TouchableOpacity style={styles.faqRow} activeOpacity={0.7}>
+              <Text style={styles.faqQuestion}>Can I cancel a request?</Text>
+              <Text style={styles.faqIcon}>›</Text>
+            </TouchableOpacity>
+            <View style={styles.divider} />
 
-            <Card style={styles.faqCard}>
-              <TouchableOpacity style={styles.faqItem}>
-                <Text style={styles.faqQuestion}>Can I cancel a request?</Text>
-                <Text style={styles.faqIcon}>›</Text>
-              </TouchableOpacity>
-            </Card>
-
-            <Card style={styles.faqCard}>
-              <TouchableOpacity style={styles.faqItem}>
-                <Text style={styles.faqQuestion}>What areas do you serve?</Text>
-                <Text style={styles.faqIcon}>›</Text>
-              </TouchableOpacity>
-            </Card>
-          </View>
+            <TouchableOpacity style={styles.faqRow} activeOpacity={0.7}>
+              <Text style={styles.faqQuestion}>What areas do you serve?</Text>
+              <Text style={styles.faqIcon}>›</Text>
+            </TouchableOpacity>
+          </Card>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -127,55 +129,61 @@ const styles = StyleSheet.create({
     padding: spacing.lg,
     gap: spacing.lg,
   },
-  supportCard: {
+  contactCard: {
     padding: spacing.xl,
-    alignItems: 'center',
-  },
-  iconCircle: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: colors.primary + '20',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: spacing.lg,
-  },
-  icon: {
-    fontSize: 40,
-  },
-  cardTitle: {
-    fontSize: typography.fontSize.xxl,
-    fontWeight: typography.fontWeight.bold,
-    color: colors.textPrimary,
-    marginBottom: spacing.sm,
-  },
-  cardSubtitle: {
-    fontSize: typography.fontSize.base,
-    color: colors.textSecondary,
-    marginBottom: spacing.md,
-  },
-  cardLink: {
-    fontSize: typography.fontSize.lg,
-    color: colors.primary,
-    fontWeight: typography.fontWeight.semiBold,
-  },
-  faqSection: {
-    marginTop: spacing.xl,
-  },
-  faqTitle: {
-    fontSize: typography.fontSize.xxl,
-    fontWeight: typography.fontWeight.bold,
-    color: colors.textPrimary,
-    marginBottom: spacing.lg,
   },
   faqCard: {
-    marginBottom: spacing.md,
+    padding: spacing.xl,
   },
-  faqItem: {
+  sectionTitle: {
+    fontSize: typography.fontSize.xxl,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.textPrimary,
+    marginBottom: spacing.lg,
+  },
+  contactRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: spacing.md,
+  },
+  contactIconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: borderRadius.md,
+    backgroundColor: colors.primary + '15',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: spacing.md,
+  },
+  contactTextContainer: {
+    flex: 1,
+  },
+  contactTitle: {
+    fontSize: typography.fontSize.lg,
+    fontWeight: typography.fontWeight.semiBold,
+    color: colors.textPrimary,
+    marginBottom: spacing.xs,
+  },
+  contactSubtitle: {
+    fontSize: typography.fontSize.base,
+    color: colors.primary,
+    fontWeight: typography.fontWeight.medium,
+    marginBottom: spacing.xs,
+  },
+  contactHours: {
+    fontSize: typography.fontSize.sm,
+    color: colors.textSecondary,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: colors.gray200,
+    marginVertical: spacing.md,
+  },
+  faqRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: spacing.lg,
+    paddingVertical: spacing.md,
   },
   faqQuestion: {
     flex: 1,
@@ -184,7 +192,7 @@ const styles = StyleSheet.create({
     fontWeight: typography.fontWeight.medium,
   },
   faqIcon: {
-    fontSize: typography.fontSize.xl,
+    fontSize: 24,
     color: colors.textSecondary,
     marginLeft: spacing.md,
   },

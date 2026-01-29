@@ -12,20 +12,67 @@ interface StatusBadgeProps {
 export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, size = 'medium' }) => {
   const getStatusConfig = () => {
     switch (status) {
+      case 'searching_for_worker':
+        return {
+          label: 'Searching for a worker',
+          backgroundColor: colors.gray200,
+          textColor: colors.gray700,
+        };
+      case 'inspection_scheduled':
+        return {
+          label: 'Inspection scheduled',
+          backgroundColor: colors.statusOngoing,
+          textColor: colors.statusOngoingText,
+        };
+      case 'awaiting_client_confirmation':
+        return {
+          label: 'Awaiting your confirmation',
+          backgroundColor: colors.statusPending,
+          textColor: colors.statusPendingText,
+        };
+      case 'waiting_for_offer':
+        return {
+          label: 'Waiting for offer',
+          backgroundColor: colors.statusPending,
+          textColor: colors.statusPendingText,
+        };
+      case 'job_scheduled':
+        return {
+          label: 'Job scheduled',
+          backgroundColor: colors.statusOngoing,
+          textColor: colors.statusOngoingText,
+        };
+
+      // Legacy/mock statuses (keep for safety during transition)
+      case 'waiting_assignment':
+        return {
+          label: 'Searching for a worker',
+          backgroundColor: colors.gray200,
+          textColor: colors.gray700,
+        };
       case 'pending_approval':
         return {
-          label: 'Pending Approval',
+          label: 'Awaiting your confirmation',
           backgroundColor: colors.statusPending,
           textColor: colors.statusPendingText,
         };
       case 'job_ongoing':
+        return {
+          label: 'In progress',
+          backgroundColor: colors.statusOngoing,
+          textColor: colors.statusOngoingText,
+        };
+
       case 'accepted':
       case 'on_the_way':
       case 'arrived':
         return {
-          label: status === 'job_ongoing' ? 'Job Ongoing' : 
-                 status === 'on_the_way' ? 'On The Way' :
-                 status === 'arrived' ? 'Arrived' : 'Accepted',
+          label:
+            status === 'on_the_way'
+              ? 'On the way'
+              : status === 'arrived'
+                ? 'Arrived'
+                : 'Accepted',
           backgroundColor: colors.statusOngoing,
           textColor: colors.statusOngoingText,
         };
@@ -49,7 +96,7 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, size = 'medium
         };
       default:
         return {
-          label: status,
+          label: String(status),
           backgroundColor: colors.gray200,
           textColor: colors.gray700,
         };

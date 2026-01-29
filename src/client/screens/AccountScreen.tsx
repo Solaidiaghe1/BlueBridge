@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -6,23 +6,136 @@ import {
   SafeAreaView,
   ScrollView,
   TouchableOpacity,
-  Switch,
+  Alert,
+  ActivityIndicator,
 } from 'react-native';
+import { Feather } from '@expo/vector-icons';
+import { useAuth, useUser } from '@clerk/clerk-expo';
 import { colors, spacing, borderRadius, typography, shadows } from '../../shared/theme';
 import { Header } from '../../shared/components/Header';
 import { Card } from '../../shared/components/Card';
-import { getCurrentUser } from '../../services/mockUser';
+import { createAuthedSupabaseClient, SupabaseUser } from '../../config/supabase';
 
 interface AccountScreenProps {
   onToggleServiceProvider: () => void;
-  isServiceProvider: boolean;
+  onPrivacyPress?: () => void;
+  onSignOut?: () => void;
 }
+
+const formatMemberSince = (createdAtIso?: string | null) => {
+  if (!createdAtIso) return '';
+  const d = new Date(createdAtIso);
+  if (Number.isNaN(d.getTime())) return '';
+  return d.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+};
 
 export const AccountScreen: React.FC<AccountScreenProps> = ({
   onToggleServiceProvider,
-  isServiceProvider,
+  onPrivacyPress,
+  onSignOut,
 }) => {
-  const user = getCurrentUser();
+  const { signOut, getToken, isSignedIn } = useAuth();
+  const { user: clerkUser, isLoaded: clerkLoaded } = useUser();
+
+  const [profile, setProfile] = useState<SupabaseUser | null>(null);
+  const [isLoadingProfile, setIsLoadingProfile] = useState(false);
+  const [profileError, setProfileError] = useState<string | null>(null);
+  const [lastLoadedClerkId, setLastLoadedClerkId] = useState<string | null>(null);
+
+  const handleSignOut = async () => {
+    Alert.alert('Sign Out', 'Are you sure you want to sign out?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Sign Out',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await signOut();
+            // Navigate back to role selection screen
+            if (onSignOut) {
+              onSignOut();
+            }
+          } catch (error) {
+            Alert.alert('Error', 'Failed to sign out. Please try again.');
+          }
+        },
+      },
+    ]);
+  };
+
+  const clerkEmail = useMemo(() => {
+    return clerkUser?.primaryEmailAddress?.emailAddress ?? '';
+  }, [clerkUser?.primaryEmailAddress?.emailAddress]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadProfile = async () => {
+      const clerkId = clerkUser?.id;
+      if (!clerkLoaded || !isSignedIn || !clerkId) return;
+
+      // Avoid refetch loops / flicker if we already loaded this user.
+      if (lastLoadedClerkId === clerkId) return;
+
+      if (isMounted) {
+        setIsLoadingProfile(true);
+        setProfileError(null);
+      }
+
+      try {
+        // Get a Clerk token. Prefer the 'supabase' template if available.
+        let token: string | null | undefined;
+        try {
+          token = await getToken({ template: 'supabase' });
+        } catch {
+          token = null;
+        }
+        if (!token) token = await getToken();
+        if (!token) throw new Error('Missing auth token');
+
+        const sb = createAuthedSupabaseClient(token);
+
+        const { data, error } = await sb
+          .from('users')
+          .select('*')
+          .eq('clerk_user_id', clerkId)
+          .maybeSingle();
+
+        if (error) throw error;
+
+        if (!isMounted) return;
+        setProfile((data as SupabaseUser) ?? null);
+        setLastLoadedClerkId(clerkId);
+      } catch (err: any) {
+        if (!isMounted) return;
+        setProfile(null);
+        setProfileError(err?.message ?? 'Failed to load profile');
+        setLastLoadedClerkId(clerkId);
+      } finally {
+        if (!isMounted) return;
+        setIsLoadingProfile(false);
+      }
+    };
+
+    loadProfile();
+
+    return () => {
+      isMounted = false;
+    };
+    // Intentionally depend on stable primitives only to prevent refetch loops.
+  }, [clerkLoaded, isSignedIn, clerkUser?.id, lastLoadedClerkId]);
+
+  const fullName = useMemo(() => {
+    const fromDb = [profile?.first_name, profile?.last_name].filter(Boolean).join(' ');
+    return fromDb || clerkUser?.fullName || 'Your Account';
+  }, [profile?.first_name, profile?.last_name, clerkUser?.fullName]);
+
+  const memberSince = useMemo(() => formatMemberSince(profile?.created_at), [profile?.created_at]);
+
+  // Requested behavior: email from Supabase (fallback to Clerk), phone/address blank
+  const emailToShow = profile?.email || clerkEmail;
+  const phoneToShow = '';
+  const addressToShow = '';
 
   return (
     <SafeAreaView style={styles.container}>
@@ -30,38 +143,27 @@ export const AccountScreen: React.FC<AccountScreenProps> = ({
         <Header title="Your Account" subtitle="Manage your profile and account settings" />
 
         <View style={styles.content}>
-          {/* Service Provider Mode Toggle */}
-          <Card style={styles.toggleCard}>
-            <View style={styles.toggleContent}>
-              <View style={styles.iconCircle}>
-                <Text style={styles.iconText}>💼</Text>
-              </View>
-              <View style={styles.toggleTextContainer}>
-                <Text style={styles.toggleTitle}>Service Provider Mode</Text>
-                <Text style={styles.toggleSubtitle}>
-                  Switch to offer your services to clients
-                </Text>
-              </View>
-              <Switch
-                value={isServiceProvider}
-                onValueChange={onToggleServiceProvider}
-                trackColor={{ false: colors.gray300, true: colors.primary + '80' }}
-                thumbColor={isServiceProvider ? colors.primary : colors.gray50}
-              />
-            </View>
-          </Card>
-
           {/* Profile Card */}
           <Card style={styles.profileCard}>
             <View style={styles.avatarContainer}>
               <View style={styles.avatar}>
-                <Text style={styles.avatarText}>👤</Text>
+                <Feather name="user" size={40} color={colors.white} />
               </View>
               <View style={styles.profileInfo}>
-                <Text style={styles.name}>
-                  {user.firstName} {user.lastName}
-                </Text>
-                <Text style={styles.memberSince}>Member since {user.memberSince}</Text>
+                <Text style={styles.name}>{fullName}</Text>
+
+                {isLoadingProfile ? (
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+                    <ActivityIndicator size="small" color={colors.primary} />
+                    <Text style={styles.memberSince}>Loading profile…</Text>
+                  </View>
+                ) : profileError ? (
+                  <Text style={[styles.memberSince, { color: colors.error }]}>{profileError}</Text>
+                ) : (
+                  <Text style={styles.memberSince}>
+                    {memberSince ? `Member since ${memberSince}` : ''}
+                  </Text>
+                )}
               </View>
             </View>
 
@@ -69,33 +171,31 @@ export const AccountScreen: React.FC<AccountScreenProps> = ({
             <View style={styles.infoSection}>
               <View style={styles.infoRow}>
                 <View style={styles.infoIconContainer}>
-                  <Text style={styles.infoIcon}>📧</Text>
+                  <Feather name="mail" size={20} color={colors.primary} />
                 </View>
                 <View style={styles.infoTextContainer}>
                   <Text style={styles.infoLabel}>Email</Text>
-                  <Text style={styles.infoValue}>{user.email}</Text>
+                  <Text style={styles.infoValue}>{emailToShow}</Text>
                 </View>
               </View>
 
               <View style={styles.infoRow}>
                 <View style={styles.infoIconContainer}>
-                  <Text style={styles.infoIcon}>📱</Text>
+                  <Feather name="phone" size={20} color={colors.primary} />
                 </View>
                 <View style={styles.infoTextContainer}>
                   <Text style={styles.infoLabel}>Phone</Text>
-                  <Text style={styles.infoValue}>{user.phone}</Text>
+                  <Text style={styles.infoValue}>{phoneToShow}</Text>
                 </View>
               </View>
 
               <View style={styles.infoRow}>
                 <View style={styles.infoIconContainer}>
-                  <Text style={styles.infoIcon}>📍</Text>
+                  <Feather name="map-pin" size={20} color={colors.primary} />
                 </View>
                 <View style={styles.infoTextContainer}>
                   <Text style={styles.infoLabel}>Address</Text>
-                  <Text style={styles.infoValue}>
-                    {user.address}, {user.city}, {user.state} {user.zip}
-                  </Text>
+                  <Text style={styles.infoValue}>{addressToShow}</Text>
                 </View>
               </View>
             </View>
@@ -109,7 +209,7 @@ export const AccountScreen: React.FC<AccountScreenProps> = ({
               <Text style={styles.settingIcon}>›</Text>
             </TouchableOpacity>
             <View style={styles.divider} />
-            <TouchableOpacity style={styles.settingRow}>
+            <TouchableOpacity style={styles.settingRow} onPress={onPrivacyPress}>
               <Text style={styles.settingText}>Privacy</Text>
               <Text style={styles.settingIcon}>›</Text>
             </TouchableOpacity>
@@ -119,10 +219,30 @@ export const AccountScreen: React.FC<AccountScreenProps> = ({
               <Text style={styles.settingIcon}>›</Text>
             </TouchableOpacity>
             <View style={styles.divider} />
-            <TouchableOpacity style={styles.settingRow}>
+            <TouchableOpacity style={styles.settingRow} onPress={handleSignOut}>
               <Text style={[styles.settingText, styles.logoutText]}>Log Out</Text>
             </TouchableOpacity>
           </Card>
+
+          {/* Service Provider Mode Toggle */}
+          <TouchableOpacity
+            style={styles.toggleCard}
+            onPress={onToggleServiceProvider}
+            activeOpacity={0.8}
+          >
+            <View style={styles.toggleContent}>
+              <View style={styles.iconCircle}>
+                <Text style={styles.iconText}>💼</Text>
+              </View>
+              <View style={styles.toggleTextContainer}>
+                <Text style={styles.toggleTitle}>Switch to Worker Mode</Text>
+                <Text style={styles.toggleSubtitle}>
+                  Offer your services and accept job requests
+                </Text>
+              </View>
+              <Feather name="arrow-right" size={24} color={colors.primary} />
+            </View>
+          </TouchableOpacity>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -142,11 +262,14 @@ const styles = StyleSheet.create({
     gap: spacing.lg,
   },
   toggleCard: {
-    padding: spacing.lg,
+    backgroundColor: colors.white,
+    borderRadius: borderRadius.xl,
+    overflow: 'hidden',
   },
   toggleContent: {
     flexDirection: 'row',
     alignItems: 'center',
+    padding: spacing.lg,
     gap: spacing.md,
   },
   iconCircle: {
@@ -193,9 +316,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  avatarText: {
-    fontSize: 40,
-  },
   profileInfo: {
     flex: 1,
   },
@@ -223,9 +343,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primary + '20',
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  infoIcon: {
-    fontSize: 16,
   },
   infoTextContainer: {
     flex: 1,

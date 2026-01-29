@@ -8,20 +8,57 @@ import {
   TouchableOpacity,
   Dimensions,
 } from 'react-native';
+import { MaterialCommunityIcons, FontAwesome5, Ionicons } from '@expo/vector-icons';
 import { colors, spacing, borderRadius, typography, shadows } from '../../shared/theme';
 import { Header } from '../../shared/components/Header';
 import { mockServices } from '../../services/mockServices';
 
 const { width } = Dimensions.get('window');
-const CARD_WIDTH = width * 0.7;
-const CARD_SPACING = spacing.lg;
+const CARD_WIDTH = width * 0.78;
+const CARD_SPACING = spacing.md;
 
 interface HomeScreenProps {
   onServiceSelect: (serviceType: string) => void;
 }
 
+// Icon component for services
+const ServiceIcon: React.FC<{ type: string; color: string }> = ({ type }) => {
+  const renderIcon = () => {
+    switch (type) {
+      case 'plumbing':
+        return <MaterialCommunityIcons name="pipe-wrench" size={80} color="white" />;
+      case 'hvac':
+        return <MaterialCommunityIcons name="air-conditioner" size={80} color="white" />;
+      case 'electrical':
+        return <Ionicons name="flash" size={80} color="white" />;
+      case 'carpentry':
+        return <FontAwesome5 name="hammer" size={70} color="white" />;
+      case 'landscaping':
+        return <MaterialCommunityIcons name="tree" size={80} color="white" />;
+      case 'painting':
+        return <MaterialCommunityIcons name="format-paint" size={80} color="white" />;
+      case 'walling':
+        return <MaterialCommunityIcons name="wall" size={80} color="white" />;
+      default:
+        return <MaterialCommunityIcons name="pipe-wrench" size={80} color="white" />;
+    }
+  };
+
+  return (
+    <View style={[styles.iconCircle, { backgroundColor: 'rgba(255, 255, 255, 0.25)' }]}>
+      {renderIcon()}
+    </View>
+  );
+};
+
 export const HomeScreen: React.FC<HomeScreenProps> = ({ onServiceSelect }) => {
   const scrollViewRef = useRef<ScrollView>(null);
+  const [currentIndex, setCurrentIndex] = React.useState(0);
+
+  const handleNotificationPress = () => {
+    // TODO: Navigate to notifications screen
+    console.log('Notification pressed');
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -29,6 +66,9 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onServiceSelect }) => {
         <Header
           title="Connect with Skilled Workers"
           subtitle="Need a professional? Choose your service below and get connected with verified blue collar workers in minutes."
+          showNotification={true}
+          notificationCount={2}
+          onNotificationPress={handleNotificationPress}
         />
 
         {/* Service Selection Section */}
@@ -47,6 +87,12 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onServiceSelect }) => {
             snapToInterval={CARD_WIDTH + CARD_SPACING}
             contentContainerStyle={styles.carouselContent}
             style={styles.carousel}
+            onScroll={(event) => {
+              const x = event.nativeEvent.contentOffset.x;
+              const index = Math.round(x / (CARD_WIDTH + CARD_SPACING));
+              setCurrentIndex(index);
+            }}
+            scrollEventThrottle={16}
           >
             {mockServices.map((service, index) => (
               <TouchableOpacity
@@ -59,9 +105,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onServiceSelect }) => {
                 onPress={() => onServiceSelect(service.type)}
                 activeOpacity={0.9}
               >
-                <View style={styles.iconContainer}>
-                  <Text style={styles.icon}>🔧</Text>
-                </View>
+                <ServiceIcon type={service.type} color={service.color} />
                 <Text style={styles.serviceName}>{service.name}</Text>
                 <Text style={styles.estimatedWait}>Estimated Wait: {service.estimatedWait}</Text>
               </TouchableOpacity>
@@ -75,16 +119,20 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ onServiceSelect }) => {
                 key={index}
                 style={[
                   styles.paginationDot,
-                  index === 0 && styles.paginationDotActive,
+                  index === currentIndex && styles.paginationDotActive,
                 ]}
               />
             ))}
           </View>
         </View>
 
-        {/* How It Works Section */}
-        <View style={styles.section}>
+        {/* How It Works Section - Teaser */}
+        <View style={styles.howItWorksTeaser}>
           <Text style={styles.sectionTitle}>How It Works</Text>
+        </View>
+
+        {/* Full How It Works Content */}
+        <View style={styles.stepsSection}>
           <View style={styles.stepsContainer}>
             <View style={styles.step}>
               <View style={styles.stepNumber}>
@@ -130,7 +178,16 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   section: {
-    paddingVertical: spacing.xl,
+    paddingTop: spacing.lg,
+    paddingBottom: spacing.sm,
+  },
+  howItWorksTeaser: {
+    paddingTop: spacing.ht,
+    paddingBottom: spacing.sm,
+  },
+  stepsSection: {
+    paddingTop: spacing.md,
+    paddingBottom: spacing.xl,
   },
   sectionTitle: {
     fontSize: typography.fontSize.xxl,
@@ -144,11 +201,11 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.base,
     color: colors.textSecondary,
     textAlign: 'center',
-    marginBottom: spacing.xl,
+    marginBottom: spacing.lg,
     paddingHorizontal: spacing.lg,
   },
   carousel: {
-    marginBottom: spacing.lg,
+    marginBottom: spacing.md,
   },
   carouselContent: {
     paddingHorizontal: (width - CARD_WIDTH) / 2,
@@ -156,34 +213,36 @@ const styles = StyleSheet.create({
   },
   serviceCard: {
     width: CARD_WIDTH,
-    height: 320,
+    aspectRatio: 1.1,
     borderRadius: borderRadius.xxl,
     padding: spacing.xl,
     alignItems: 'center',
     justifyContent: 'center',
+    overflow: 'hidden',
   },
-  iconContainer: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+  iconCircle: {
+    width: 140,
+    height: 140,
+    borderRadius: 70,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: spacing.xl,
   },
-  icon: {
+  iconEmoji: {
     fontSize: 64,
   },
   serviceName: {
     fontSize: typography.fontSize.xxxl,
     fontWeight: typography.fontWeight.bold,
     color: colors.white,
-    marginBottom: spacing.md,
+    marginBottom: spacing.sm,
+    textAlign: 'center',
   },
   estimatedWait: {
     fontSize: typography.fontSize.lg,
     color: colors.white,
-    opacity: 0.9,
+    opacity: 0.75,
+    textAlign: 'center',
   },
   pagination: {
     flexDirection: 'row',

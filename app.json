@@ -14,19 +14,28 @@
     "assetBundlePatterns": [
       "**/*"
     ],
+    "experiments": {
+      "turboModules": false
+    },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.bluebridge.mobile"
+      "bundleIdentifier": "com.bluebridge.mobile",
+      "newArchEnabled": false
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#2563EB"
       },
-      "package": "com.bluebridge.mobile"
+      "package": "com.bluebridge.mobile",
+      "newArchEnabled": false
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "plugins": [],
+    "extra": {
+      "clerkPublishableKey": ""
     }
   }
 }

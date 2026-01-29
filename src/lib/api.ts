@@ -15,7 +15,7 @@ export const createRequest = async (data: RequestFormData): Promise<Request> => 
   
   // Use mock service for now
   return mockCreateRequest({
-    serviceType: data.title.toLowerCase().includes('plumbing') ? 'plumbing' : 'general',
+    service_type: data.title.toLowerCase().includes('plumbing') ? 'plumbing' : 'general',
     title: data.title,
     description: data.description,
     location: data.locationType,
